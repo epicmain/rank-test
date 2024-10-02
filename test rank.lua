@@ -190,8 +190,6 @@ local BEST_EGG
 local HATCH_RARE_PET
 local totalBestPet
 
-local currentMaxHatch = eggCmds.GetMaxHatch()
-
 local rainbowEggPets = {
     "Pastel Griffin",
     "Pastel Goat",
@@ -466,14 +464,9 @@ end
 
 local function DeleteMapTextures(v)
     -- Check and delete folders named "PARTS_LOD" and Models named "PARTS"
-    for _, child in pairs(v:GetChildren()) do
-        if child:IsA("Folder") and child.Name == "PARTS_LOD" then
-            child:Destroy() -- Delete the folder
-        elseif child:IsA("Model") and child.Name == "PARTS" then
-            child:Destroy() -- Delete the Model
-        else
-            -- Recursively process child objects
-            DeleteMapTextures(child) -- Corrected function call
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("Part") or v:IsA("BasePart") then
+            v.Transparency = 1
         end
     end
 end
@@ -1467,43 +1460,47 @@ local function teleportToMachine(mapName)
 end
 
 local function checkAndPurchaseEggSlot()
+    local teleportedToEggSlotMachine = false
     if (tick() - eggSlotTimeStart) >= checkEggSlotDelay then
-        currentEggSlots = clientSaveGet.EggSlotsPurchased
+        while true do
+            task.wait(2)
+            currentEggSlots = clientSaveGet.EggSlotsPurchased
 
-        -- if 0 to 9, 33, 67 to 79 -> +1 to currentEggSlots
-        -- if 10 to 28 -> +2 to currentEggSlots
-        -- if 30, 34 to 64 -> +3 to currentEggSlots
-        if (currentEggSlots <= 9) or (currentEggSlots == 33) or (currentEggSlots >= 67 and currentEggSlots <= 79) then
-            currentEggSlots = currentEggSlots + 1
-        elseif (currentEggSlots >= 10 and currentEggSlots <= 28) then
-            currentEggSlots = currentEggSlots + 2
-        elseif (currentEggSlots == 30) or (currentEggSlots >= 34 and currentEggSlots <= 64) then
-            currentEggSlots = currentEggSlots + 3
-        else
-            print("CANT FIND currentEggSlots!!!")
-        end
+            -- if 0 to 9, 33, 67 to 79 -> +1 to currentEggSlots
+            -- if 10 to 28 -> +2 to currentEggSlots
+            -- if 30, 34 to 64 -> +3 to currentEggSlots
+            if (currentEggSlots <= 9) or (currentEggSlots == 33) or (currentEggSlots >= 67 and currentEggSlots <= 79) then
+                currentEggSlots = currentEggSlots + 1
+            elseif (currentEggSlots >= 10 and currentEggSlots <= 28) then
+                currentEggSlots = currentEggSlots + 2
+            elseif (currentEggSlots == 30) or (currentEggSlots >= 34 and currentEggSlots <= 64) then
+                currentEggSlots = currentEggSlots + 3
+            else
+                print("CANT FIND currentEggSlots!!!")
+            end
 
-        -- check if can afford egg slot
-        if currencyCmds.Get("Diamonds") >= eggSlotDiamondCost[currentEggSlots] then
-            if currentEggSlots < rankCmds.GetMaxPurchasableEggSlots() and currentEggSlots <= MAX_EGG_SLOTS then
+            -- check if can afford egg slot
+            if currencyCmds.Get("Diamonds") >= eggSlotDiamondCost[currentEggSlots] and 
+            currentEggSlots < rankCmds.GetMaxPurchasableEggSlots() and 
+            currentEggSlots <= MAX_EGG_SLOTS then
+                if not teleportedToEggSlotMachine then
+                    teleportToMachine("8 | Backyard")  -- teleport to egg machine #8 backyard
+                    teleportedToEggSlotMachine = true
+                end
+
                 print("Buying slot " .. tostring(currentEggSlots) .. " for " .. tostring(eggSlotDiamondCost[currentEggSlots]) .. " diamonds")
-
-                teleportToMachine("8 | Backyard")  -- teleport to egg machine #8 backyard
-
-                task.wait(1)
-
-                local args = {
-                    [1] = currentEggSlots
-                }
-
-                ReplicatedStorage.Network.EggHatchSlotsMachine_RequestPurchase:InvokeServer(unpack(args))
+                ReplicatedStorage.Network.EggHatchSlotsMachine_RequestPurchase:InvokeServer(currentEggSlots)
 
                 print("Purchased egg slot " .. tostring(currentEggSlots))
-                currentZone = nil
-                teleportToMaxZone()
+            else
+                break
             end
         end
-        currentMaxHatch = require(Client.EggCmds).GetMaxHatch()
+        if teleportedToEggSlotMachine then
+            currentZone = nil
+            teleportToMaxZone()
+        end
+        currentMaxHatch = require(eggCmds).GetMaxHatch()
         eggSlotTimeStart = tick() -- restart timer
     end
 end
@@ -1513,11 +1510,11 @@ local function checkAndPurchasePetSlot()
     local teleportedToPetSlotMachine = false
     if (tick() - petEquipSlotTimeStart) >= checkPetSlotDelay then
         while true do
-            task.wait(5)
+            task.wait(2)
             currentEquipSlots = clientSaveGet.PetSlotsPurchased + 1
             if currencyCmds.Get("Diamonds") >= petSlotDiamondCost[currentEquipSlots] and 
             currentEquipSlots < rankCmds.GetMaxPurchasableEquipSlots() and 
-            currentEquipSlots + 3 <= MAX_PET_SLOTS then
+            currentEquipSlots + 2 <= MAX_PET_SLOTS then -- was +3
                 if not teleportedToPetSlotMachine then
                     teleportToMachine("4 | Green Forest")
                     teleportedToPetSlotMachine = true
@@ -1939,9 +1936,9 @@ while true do
         if maxZoneData.ZoneNumber >= 4 then
             checkAndPurchasePetSlot()
         end
-        -- if maxZoneData.ZoneNumber >= 8 then
-        --     checkAndPurchaseEggSlot()
-        -- end
+        if maxZoneData.ZoneNumber >= 8 then
+            checkAndPurchaseEggSlot()
+        end
 
         for goalsNum, tbl in clientSaveGet.Goals do
             task.wait(1)
