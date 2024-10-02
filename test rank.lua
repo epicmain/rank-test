@@ -530,8 +530,10 @@ local function teleportToMaxZone()
 
     if maxZoneData.ZoneNumber >= getgenv().autoWorldConfig.ZONE_TO_REACH and rankCmds.GetMaxRank() >= getgenv().autoWorldConfig.RANK_TO_REACH and clientSaveGet.Rebirths >= getgenv().autoWorldConfig.REBIRTH_TO_REACH then
         print("Reached selected zone, rebirth and rank")
+        print("unequipping")
         game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Pets_UnequipAll"):FireServer()
-        task.wait(2)
+        task.wait(1)
+        print("equipping")
         require(game:GetService("ReplicatedStorage").Library.Client.PetCmds).Restore()
         task.wait(2)
         DeleteMapTextures(map)
@@ -661,9 +663,11 @@ local function checkAndPurchaseUpgrades()
                     print("Bought " .. ability .. " from " .. mapName)
                     upgradeCmds.Purchase(ability, mapName)
                     table.remove(upgrades, i)
+                    currentZone = nil
                     teleportToMaxZone()
                 elseif upgradeCmds.Owns(ability, mapName) then
                     table.remove(upgrades, i)
+                    currentZone = nil
                     teleportToMaxZone()
                 end
             end  
@@ -1140,6 +1144,7 @@ local function autoBossChest()
             task.wait(2)
         end
     end
+    currentZone = nil
     teleportToMaxZone()
 end
 
@@ -1189,6 +1194,7 @@ local function buyVendingMachine()
             myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
+            currentZone = nil
             teleportToMaxZone()
 
         elseif checkType(questId) == "COLLECT_POTION" and 
@@ -1202,6 +1208,7 @@ local function buyVendingMachine()
             myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
+            currentZone = nil
             teleportToMaxZone()
 
         elseif checkType(questId) == "COLLECT_ENCHANT" and 
@@ -1215,6 +1222,7 @@ local function buyVendingMachine()
             myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
+            currentZone = nil
             teleportToMaxZone()
         end
     end
@@ -1496,6 +1504,7 @@ local function checkAndPurchaseEggSlot()
                 ReplicatedStorage.Network.EggHatchSlotsMachine_RequestPurchase:InvokeServer(unpack(args))
 
                 print("Purchased egg slot " .. tostring(currentEggSlots))
+                currentZone = nil
                 teleportToMaxZone()
             end
         end
@@ -1528,6 +1537,7 @@ local function checkAndPurchasePetSlot()
             end
         end
         if teleportedToPetSlotMachine then
+            currentZone = nil
             teleportToMaxZone()
         end
         petEquipSlotTimeStart = tick()
@@ -1738,7 +1748,7 @@ local function upgradeEnchant()
             end
         end
     end
-
+    currentZone = nil
     teleportToMaxZone()
 end
 
@@ -1771,7 +1781,7 @@ local function upgradePotion()
             end
         end
     end
-
+    currentZone = nil
     teleportToMaxZone()
 end
 
@@ -1885,6 +1895,7 @@ while unfinished do
     local success, _ = ReplicatedStorage.Network.Zones_RequestPurchase:InvokeServer(nextZoneName)
     if success then
         print("Successfully purchased " .. nextZoneName)
+        currentZone = nil
         teleportToMaxZone()
         startAutoHatchEggDelay = tick()
     end
@@ -2122,6 +2133,7 @@ while true do
                 if not usedGoldMachine then  -- get normal pets
                     teleportAndHatch()
                 end
+                currentZone = nil
                 teleportToMaxZone()
 
             elseif questName == "BEST_RAINBOW_PET" then
@@ -2149,6 +2161,7 @@ while true do
                         teleportAndHatch()
                     end
                 end
+                currentZone = nil
                 teleportToMaxZone()
 
             -- Using Items
@@ -2191,12 +2204,14 @@ while true do
                 print("Doing Quest:", questName)
                 BEST_EGG = true
                 teleportAndHatch()
+                currentZone = nil
                 teleportToMaxZone()
             elseif questName == "HATCH_RARE_PET" then
                 print("Doing Quest:", questName)
                 if len(clientSaveGet.Goals) > 0 then
                     HATCH_RARE_PET = true
                     teleportAndHatch()
+                    currentZone = nil
                     teleportToMaxZone()
                 end
 
@@ -2210,6 +2225,7 @@ while true do
                     optimizeFishing()
                 end
                 startFishing()
+                currentZone = nil
                 teleportToMaxZone()
 
             elseif questName == "DIGSITE" then
@@ -2223,6 +2239,7 @@ while true do
                         end
                     end
                     startDigging()
+                    currentZone = nil
                     teleportToMaxZone()
                 end
             end
