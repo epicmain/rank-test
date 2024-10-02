@@ -2095,6 +2095,7 @@ while true do
                 os.time() - heavenGatesBossChestCooldownStart >= bossChestCooldown then
                     callByBoss = true
                     autoBossChest()
+                    currentZone = nil
                     teleportToMaxZone()
                 elseif questName == "COLLECT_ENCHANT" and checkEnoughEnchant() then
                     upgradeEnchant()
