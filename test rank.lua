@@ -83,7 +83,6 @@ local currentZone
 local nextRebirthData = rebirthCmds.GetNextRebirth()
 local rebirthNumber
 local rebirthZone
-local originalPosition
 
 
 local startAutoHatchEggDelay = tick()
@@ -480,19 +479,6 @@ local function DeleteMapTextures(v)
 end
 
 
-local function teleportLatestOriginalPos()
-    print("Teleporting back to original pos")
-    task.wait(1)
-    myHumanoidRootPart.CFrame = originalPosition + Vector3.new(0, 10, 0)
-    task.wait(2)
-    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Pets_UnequipAll"):FireServer()
-    task.wait(1)
-    petCmds.Restore()
-    DeleteMapTextures(map) -- DISABLED IN TESTING AUTORANK, RENABLE IN AUTOWORLD!!!
-    print("Pets Restored.")
-end
-
-
 local function teleportToMaxZone()
     print("in teleportToMaxZone()")
 
@@ -547,6 +533,7 @@ local function teleportToMaxZone()
         game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Pets_UnequipAll"):FireServer()
         task.wait(2)
         require(game:GetService("ReplicatedStorage").Library.Client.PetCmds).Restore()
+        task.wait(2)
         DeleteMapTextures(map)
         print("Pets Restored.")
         unfinished = false
@@ -655,7 +642,6 @@ local function checkAndPurchaseUpgrades()
             if upgradeCmds.Owns(ability, mapName) then
                 table.remove(upgrades, i)
             elseif not upgradeCmds.Owns(ability, mapName) and currencyCmds.Get("Diamonds") > gemAmount and gemAmount < MAX_UPGRADE_GEM then
-                originalPosition = myHumanoidRootPart.CFrame -- save original position
                 -- Teleport to zone so it can detect if owned, if too far it will detect false.
                 for _, v in pairs(map:GetChildren()) do
                     if string.find(v.Name, tostring(areaNumber) .. " | " .. mapName) then
@@ -675,10 +661,10 @@ local function checkAndPurchaseUpgrades()
                     print("Bought " .. ability .. " from " .. mapName)
                     upgradeCmds.Purchase(ability, mapName)
                     table.remove(upgrades, i)
-                    teleportLatestOriginalPos()
+                    teleportToMaxZone()
                 elseif upgradeCmds.Owns(ability, mapName) then
                     table.remove(upgrades, i)
-                    teleportLatestOriginalPos()
+                    teleportToMaxZone()
                 end
             end  
         end
@@ -1073,7 +1059,6 @@ local function isWithinRange(part)
 end
 
 local function autoBossChest()
-    originalPosition = myHumanoidRootPart.CFrame
     local sortedKeys = {}
     for key in pairs(BigChests) do
         table.insert(sortedKeys, key)
@@ -1155,12 +1140,11 @@ local function autoBossChest()
             task.wait(2)
         end
     end
-    teleportLatestOriginalPos()
+    teleportToMaxZone()
 end
 
 
 local function buyVendingMachine()
-    originalPosition = myHumanoidRootPart.CFrame
     print("In buyVendingMachine")
     local sortedKeys = {}
     for key in pairs(vendingMachines) do
@@ -1205,7 +1189,7 @@ local function buyVendingMachine()
             myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
-            teleportLatestOriginalPos()
+            teleportToMaxZone()
 
         elseif checkType(questId) == "COLLECT_POTION" and 
         (vendingMachineName == "PotionVendingMachine1" or vendingMachineName == "PotionVendingMachine2") and 
@@ -1218,7 +1202,7 @@ local function buyVendingMachine()
             myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
-            teleportLatestOriginalPos()
+            teleportToMaxZone()
 
         elseif checkType(questId) == "COLLECT_ENCHANT" and 
         (vendingMachineName == "EnchantVendingMachine1" or vendingMachineName == "EnchantVendingMachine2") and 
@@ -1231,7 +1215,7 @@ local function buyVendingMachine()
             myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
-            teleportLatestOriginalPos()
+            teleportToMaxZone()
         end
     end
 end
@@ -1499,7 +1483,6 @@ local function checkAndPurchaseEggSlot()
         -- check if can afford egg slot
         if currencyCmds.Get("Diamonds") >= eggSlotDiamondCost[currentEggSlots] then
             if currentEggSlots < rankCmds.GetMaxPurchasableEggSlots() and currentEggSlots <= MAX_EGG_SLOTS then
-                originalPosition = myHumanoidRootPart.CFrame
                 print("Buying slot " .. tostring(currentEggSlots) .. " for " .. tostring(eggSlotDiamondCost[currentEggSlots]) .. " diamonds")
 
                 teleportToMachine("8 | Backyard")  -- teleport to egg machine #8 backyard
@@ -1513,7 +1496,7 @@ local function checkAndPurchaseEggSlot()
                 ReplicatedStorage.Network.EggHatchSlotsMachine_RequestPurchase:InvokeServer(unpack(args))
 
                 print("Purchased egg slot " .. tostring(currentEggSlots))
-                teleportLatestOriginalPos()
+                teleportToMaxZone()
             end
         end
         currentMaxHatch = require(Client.EggCmds).GetMaxHatch()
@@ -1532,7 +1515,6 @@ local function checkAndPurchasePetSlot()
             currentEquipSlots < rankCmds.GetMaxPurchasableEquipSlots() and 
             currentEquipSlots + 3 <= MAX_PET_SLOTS then
                 if not teleportedToPetSlotMachine then
-                    originalPosition = myHumanoidRootPart.CFrame
                     teleportToMachine("4 | Green Forest")
                     teleportedToPetSlotMachine = true
                 end
@@ -1546,7 +1528,7 @@ local function checkAndPurchasePetSlot()
             end
         end
         if teleportedToPetSlotMachine then
-            teleportLatestOriginalPos()
+            teleportToMaxZone()
         end
         petEquipSlotTimeStart = tick()
     end
@@ -1724,7 +1706,6 @@ end
 
 local function upgradeEnchant()
     local amountToUpgrade
-    originalPosition = myHumanoidRootPart.CFrame
     teleportToMachine("16 | Crimson Forest")
 
     for enchantId, tbl in inventory.Enchant do
@@ -1758,14 +1739,13 @@ local function upgradeEnchant()
         end
     end
 
-    teleportLatestOriginalPos()
+    teleportToMaxZone()
 end
 
 
 local function upgradePotion()
     print("Upgrading Potion")
     local amountToUpgrade
-    originalPosition = myHumanoidRootPart.CFrame
     teleportToMachine("13 | Dark Forest")
 
     for potionId, tbl in inventory.Potion do
@@ -1792,7 +1772,7 @@ local function upgradePotion()
         end
     end
 
-    teleportLatestOriginalPos()
+    teleportToMaxZone()
 end
 
 
@@ -2100,7 +2080,6 @@ while true do
             -- Collecting
             elseif questName == "COLLECT_POTION" or questName == "COLLECT_ENCHANT" then
                 print("Doing Quest:", questName)
-                originalPosition = myHumanoidRootPart.CFrame
                 print("Beach Boss Chest Cooldown Time: ".. (os.time() - beachBossChestCooldownStart))
                 print("Underworld Boss Chest Cooldown Time: ".. (os.time() - underWorldBossChestCooldownStart))
                 print("No Path Forest Boss Chest Cooldown Time: ".. (os.time() - noPathForestBossChestCooldownStart))
@@ -2111,7 +2090,7 @@ while true do
                 os.time() - heavenGatesBossChestCooldownStart >= bossChestCooldown then
                     callByBoss = true
                     autoBossChest()
-                    teleportLatestOriginalPos()
+                    teleportToMaxZone()
                 elseif questName == "COLLECT_ENCHANT" and checkEnoughEnchant() then
                     upgradeEnchant()
                 elseif questName == "COLLECT_POTION" and checkEnoughPotion() then
@@ -2138,19 +2117,17 @@ while true do
             elseif questName == "BEST_GOLD_PET" then
                 print("Doing Quest:", questName)
                 local usedGoldMachine
-                originalPosition = myHumanoidRootPart.CFrame
                 teleportToMachine("10 | Mine")
                 usedGoldMachine = useGoldMachine(tbl)  
                 if not usedGoldMachine then  -- get normal pets
                     teleportAndHatch()
                 end
-                teleportLatestOriginalPos()
+                teleportToMaxZone()
 
             elseif questName == "BEST_RAINBOW_PET" then
                 print("Doing Quest:", questName)
                 local usedRainbowMachine
                 totalBestPet = 0
-                originalPosition = myHumanoidRootPart.CFrame
                 teleportToMachine("31 | Desert Pyramids")
                 usedRainbowMachine = useRainbowMachine(tbl)
                 if not usedRainbowMachine then  -- get golden pets
@@ -2172,7 +2149,7 @@ while true do
                         teleportAndHatch()
                     end
                 end
-                teleportLatestOriginalPos()
+                teleportToMaxZone()
 
             -- Using Items
             -- Potions cooldown too long, have to drink when required for goals
@@ -2212,23 +2189,20 @@ while true do
             -- Hatch Eggs
             elseif questName == "BEST_EGG" then
                 print("Doing Quest:", questName)
-                originalPosition = myHumanoidRootPart.CFrame
                 BEST_EGG = true
                 teleportAndHatch()
-                teleportLatestOriginalPos()
+                teleportToMaxZone()
             elseif questName == "HATCH_RARE_PET" then
                 print("Doing Quest:", questName)
                 if len(clientSaveGet.Goals) > 0 then
-                    originalPosition = myHumanoidRootPart.CFrame
                     HATCH_RARE_PET = true
                     teleportAndHatch()
-                    teleportLatestOriginalPos()
+                    teleportToMaxZone()
                 end
 
             -- DIGGING AND FISHING
             elseif questName == "FISHING" then
                 print("Doing Quest:", questName)
-                originalPosition = myHumanoidRootPart.CFrame
                 print("Doing Fishing")
                 teleportToFishing()
                 if not fishingOptimized then
@@ -2236,12 +2210,11 @@ while true do
                     optimizeFishing()
                 end
                 startFishing()
-                teleportLatestOriginalPos()
+                teleportToMaxZone()
 
             elseif questName == "DIGSITE" then
                 print("Doing Quest:", questName)
                 if len(clientSaveGet.Goals) > 0 then
-                    originalPosition = myHumanoidRootPart.CFrame
                     teleportToDigsite()
                     -- Delete digsite texture (SAVE CPU)
                     for _, v in pairs(Active.Digsite:GetChildren()) do
@@ -2250,7 +2223,7 @@ while true do
                         end
                     end
                     startDigging()
-                    teleportLatestOriginalPos()
+                    teleportToMaxZone()
                 end
             end
         end
