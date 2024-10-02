@@ -462,8 +462,7 @@ local function checkType(number)
 end 
 
 
-local function DeleteMapTextures(v)
-    -- Check and delete folders named "PARTS_LOD" and Models named "PARTS"
+local function DeleteAllTextures()
     for _, v in pairs(game:GetDescendants()) do
         if v:IsA("Part") or v:IsA("BasePart") then
             v.Transparency = 1
@@ -524,10 +523,10 @@ local function teleportToMaxZone()
     if maxZoneData.ZoneNumber >= getgenv().autoWorldConfig.ZONE_TO_REACH and rankCmds.GetMaxRank() >= getgenv().autoWorldConfig.RANK_TO_REACH and clientSaveGet.Rebirths >= getgenv().autoWorldConfig.REBIRTH_TO_REACH then
         print("Reached selected zone, rebirth and rank")
         game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Pets_UnequipAll"):FireServer()
-        task.wait(1)
+        task.wait(2)
         require(game:GetService("ReplicatedStorage").Library.Client.PetCmds).Restore()
         task.wait(2)
-        DeleteMapTextures(map)
+        DeleteAllTextures()
         print("Pets Restored.")
         unfinished = false
     end
@@ -1463,7 +1462,7 @@ local function checkAndPurchaseEggSlot()
     local teleportedToEggSlotMachine = false
     if (tick() - eggSlotTimeStart) >= checkEggSlotDelay then
         while true do
-            task.wait(2)
+            task.wait(4)
             currentEggSlots = clientSaveGet.EggSlotsPurchased
 
             -- if 0 to 9, 33, 67 to 79 -> +1 to currentEggSlots
@@ -1496,11 +1495,12 @@ local function checkAndPurchaseEggSlot()
                 break
             end
         end
+        print("Broken out of loop")
         if teleportedToEggSlotMachine then
             currentZone = nil
             teleportToMaxZone()
         end
-        currentMaxHatch = require(eggCmds).GetMaxHatch()
+        currentMaxHatch = eggCmds.GetMaxHatch()
         eggSlotTimeStart = tick() -- restart timer
     end
 end
@@ -1510,11 +1510,12 @@ local function checkAndPurchasePetSlot()
     local teleportedToPetSlotMachine = false
     if (tick() - petEquipSlotTimeStart) >= checkPetSlotDelay then
         while true do
-            task.wait(2)
+            task.wait(4)
             currentEquipSlots = clientSaveGet.PetSlotsPurchased + 1
+
             if currencyCmds.Get("Diamonds") >= petSlotDiamondCost[currentEquipSlots] and 
             currentEquipSlots < rankCmds.GetMaxPurchasableEquipSlots() and 
-            currentEquipSlots + 2 <= MAX_PET_SLOTS then -- was +3
+            currentEquipSlots + 4 <= MAX_PET_SLOTS then
                 if not teleportedToPetSlotMachine then
                     teleportToMachine("4 | Green Forest")
                     teleportedToPetSlotMachine = true
@@ -1931,312 +1932,311 @@ end
 task.wait(2)
 while true do
     task.wait()
-    pcall(function()
-        local zoneName, maxZoneData = zoneCmds.GetMaxOwnedZone()
-        if maxZoneData.ZoneNumber >= 4 then
-            checkAndPurchasePetSlot()
+    local zoneName, maxZoneData = zoneCmds.GetMaxOwnedZone()
+    if maxZoneData.ZoneNumber >= 4 then
+        checkAndPurchasePetSlot()
+    end
+
+    if maxZoneData.ZoneNumber >= 8 then
+        checkAndPurchaseEggSlot()
+    end
+
+    for goalsNum, tbl in clientSaveGet.Goals do
+        task.wait(1)
+        goldToRainbow = false
+        goalsNumber = goalsNum
+        HATCH_RARE_PET = false
+        BEST_EGG = false
+        questName = checkType(tbl["Type"])
+        questAmount = tbl["Amount"]
+        questProgress = tbl["Progress"]
+        if tbl["PotionTier"] ~= nil and tbl["PotionTier"] > 1 then
+            questPotionTier = tbl["PotionTier"] - 1
+        else
+            questPotionTier = 1  -- default questPotionTier 1, it will only enchant tier 1 when "collecting potion"
         end
-        if maxZoneData.ZoneNumber >= 8 then
-            checkAndPurchaseEggSlot()
+        if tbl["EnchantTier"] ~= nil and tbl["EnchantTier"] > 1 then
+            questEnchantTier = tbl["EnchantTier"] - 1
+        else
+            questEnchantTier = 1  -- default questEnchantTier 1, it will only enchant tier 1 when "collecting enchant"
         end
+        questActualAmount = nil
+        callByBoss = false
+        getBestEggData()
 
-        for goalsNum, tbl in clientSaveGet.Goals do
-            task.wait(1)
-            goldToRainbow = false
-            goalsNumber = goalsNum
-            HATCH_RARE_PET = false
-            BEST_EGG = false
-            questName = checkType(tbl["Type"])
-            questAmount = tbl["Amount"]
-            questProgress = tbl["Progress"]
-            if tbl["PotionTier"] ~= nil and tbl["PotionTier"] > 1 then
-                questPotionTier = tbl["PotionTier"] - 1
-            else
-                questPotionTier = 1  -- default questPotionTier 1, it will only enchant tier 1 when "collecting potion"
-            end
-            if tbl["EnchantTier"] ~= nil and tbl["EnchantTier"] > 1 then
-                questEnchantTier = tbl["EnchantTier"] - 1
-            else
-                questEnchantTier = 1  -- default questEnchantTier 1, it will only enchant tier 1 when "collecting enchant"
-            end
-            questActualAmount = nil
-            callByBoss = false
-            getBestEggData()
-
-            questActualAmount = questAmount - questProgress
+        questActualAmount = questAmount - questProgress
 
 
-            -- Using Misc Items
-            if questName == "BEST_LUCKYBLOCK" then
-                print("Doing Quest:", questName)
-                for itemId, tbl in inventory.Misc do
-                    if tbl.id == "Mini Lucky Block" then
-                        for i=1, questActualAmount do
-                            while true do
-                                task.wait()
-                                if len(clientSaveGet.Goals) == 0 then break end
-                                local questId = clientSaveGet.Goals[goalsNumber]["Type"]
-                                if not thereIsAlreadySomethingInThisArea() and checkType(questId) == "BEST_LUCKYBLOCK" then
-                                    consumeRandomEvent("Mini Lucky Block", "MiniLuckyBlock_Consume")
-                                    while thereIsAlreadySomethingInThisArea() do
-                                        task.wait(0.3)
-                                    end
-                                    break
-                                elseif checkType(questId) ~= "BEST_LUCKYBLOCK" then
-                                    break
-                                end
-                            end
-                        end
-                        break
-                    end
-                end
-
-
-
-            elseif questName == "BEST_PINATA" then
-                print("Doing Quest:", questName)
-                for itemId, tbl in inventory.Misc do
-                    if tbl.id == "Mini Pinata" then
-                        for i=1, questActualAmount do
-                            while true do
-                                task.wait()
-                                if len(clientSaveGet.Goals) == 0 then break end
-                                local questId = clientSaveGet.Goals[goalsNumber]["Type"]
-                                if not thereIsAlreadySomethingInThisArea() and checkType(questId) == "BEST_PINATA" then
-                                    consumeRandomEvent("Mini Pinata", "MiniPinata_Consume")
-                                    while thereIsAlreadySomethingInThisArea() do
-                                        task.wait(0.3)
-                                    end
-                                    break
-                                elseif checkType(questId) ~= "BEST_PINATA" then
-                                    break
-                                end
-                            end
-                        end
-                        break
-                    end
-                end
-
-
-
-            elseif questName == "BEST_COMET" or questName == "COMET" then
-                print("Doing Quest:", questName)
-                for itemId, tbl in inventory.Misc do
-                    if tbl.id == "Comet" then
-                        for i=1, questActualAmount do
-                            while true do
-                                task.wait()
-                                if len(clientSaveGet.Goals) == 0 then break end
-                                local questId = clientSaveGet.Goals[goalsNumber]["Type"]
-                                if not thereIsAlreadySomethingInThisArea() and (checkType(questId) == "BEST_COMET" or checkType(questId) == "COMET") then
-                                    consumeRandomEvent("Comet", "Comet_Spawn")
-                                    while thereIsAlreadySomethingInThisArea() do
-                                        task.wait(0.3)
-                                    end
-                                    break
-                                elseif checkType(questId) ~= "BEST_COMET" and checkType(questId) ~= "COMET" then
-                                    break
-                                end
-                            end
-                        end
-                        break
-                    end
-                end
-
-
-
-            elseif questName == "BEST_COIN_JAR" or questName == "COIN_JAR" then
-                print("Doing Quest:", questName)
-                local coinJar
-                for itemId, tbl in inventory.Misc do
-                    task.wait()
-                    if tbl.id == "Basic Coin Jar" then
-                        coinJar = tbl.id
-                        break
-                    elseif tbl.id == "Giant Coin Jar" then
-                        coinJar = tbl.id
-                    end
-                end
-                if coinJar ~= nil then
+        -- Using Misc Items
+        if questName == "BEST_LUCKYBLOCK" then
+            print("Doing Quest:", questName)
+            for itemId, tbl in inventory.Misc do
+                if tbl.id == "Mini Lucky Block" then
                     for i=1, questActualAmount do
                         while true do
                             task.wait()
                             if len(clientSaveGet.Goals) == 0 then break end
                             local questId = clientSaveGet.Goals[goalsNumber]["Type"]
-                            if not thereIsAlreadySomethingInThisArea() and (checkType(questId) == "BEST_COIN_JAR" or checkType(questId) == "COIN_JAR") then
-                                consumeRandomEvent(coinJar, "CoinJar_Spawn")
+                            if not thereIsAlreadySomethingInThisArea() and checkType(questId) == "BEST_LUCKYBLOCK" then
+                                consumeRandomEvent("Mini Lucky Block", "MiniLuckyBlock_Consume")
                                 while thereIsAlreadySomethingInThisArea() do
                                     task.wait(0.3)
                                 end
                                 break
-                            elseif checkType(questId) ~= "BEST_COIN_JAR" and checkType(questId) ~= "COIN_JAR" then
+                            elseif checkType(questId) ~= "BEST_LUCKYBLOCK" then
                                 break
                             end
                         end
                     end
                     break
                 end
-            
+            end
 
 
-            -- Collecting
-            elseif questName == "COLLECT_POTION" or questName == "COLLECT_ENCHANT" then
-                print("Doing Quest:", questName)
-                print("Beach Boss Chest Cooldown Time: ".. (os.time() - beachBossChestCooldownStart))
-                print("Underworld Boss Chest Cooldown Time: ".. (os.time() - underWorldBossChestCooldownStart))
-                print("No Path Forest Boss Chest Cooldown Time: ".. (os.time() - noPathForestBossChestCooldownStart))
-                print("Heaven Gates Boss Chest Cooldown Time: ".. (os.time() - heavenGatesBossChestCooldownStart))
-                if os.time() - beachBossChestCooldownStart >= bossChestCooldown or
-                os.time() - underWorldBossChestCooldownStart >= bossChestCooldown or
-                os.time() - noPathForestBossChestCooldownStart >= bossChestCooldown or
-                os.time() - heavenGatesBossChestCooldownStart >= bossChestCooldown then
-                    callByBoss = true
-                    autoBossChest()
-                    currentZone = nil
-                    teleportToMaxZone()
-                elseif questName == "COLLECT_ENCHANT" and checkEnoughEnchant() then
-                    upgradeEnchant()
-                elseif questName == "COLLECT_POTION" and checkEnoughPotion() then
-                    upgradePotion()
-                else
-                    buyVendingMachine()
+
+        elseif questName == "BEST_PINATA" then
+            print("Doing Quest:", questName)
+            for itemId, tbl in inventory.Misc do
+                if tbl.id == "Mini Pinata" then
+                    for i=1, questActualAmount do
+                        while true do
+                            task.wait()
+                            if len(clientSaveGet.Goals) == 0 then break end
+                            local questId = clientSaveGet.Goals[goalsNumber]["Type"]
+                            if not thereIsAlreadySomethingInThisArea() and checkType(questId) == "BEST_PINATA" then
+                                consumeRandomEvent("Mini Pinata", "MiniPinata_Consume")
+                                while thereIsAlreadySomethingInThisArea() do
+                                    task.wait(0.3)
+                                end
+                                break
+                            elseif checkType(questId) ~= "BEST_PINATA" then
+                                break
+                            end
+                        end
+                    end
+                    break
+                end
+            end
+
+
+
+        elseif questName == "BEST_COMET" or questName == "COMET" then
+            print("Doing Quest:", questName)
+            for itemId, tbl in inventory.Misc do
+                if tbl.id == "Comet" then
+                    for i=1, questActualAmount do
+                        while true do
+                            task.wait()
+                            if len(clientSaveGet.Goals) == 0 then break end
+                            local questId = clientSaveGet.Goals[goalsNumber]["Type"]
+                            if not thereIsAlreadySomethingInThisArea() and (checkType(questId) == "BEST_COMET" or checkType(questId) == "COMET") then
+                                consumeRandomEvent("Comet", "Comet_Spawn")
+                                while thereIsAlreadySomethingInThisArea() do
+                                    task.wait(0.3)
+                                end
+                                break
+                            elseif checkType(questId) ~= "BEST_COMET" and checkType(questId) ~= "COMET" then
+                                break
+                            end
+                        end
+                    end
+                    break
+                end
+            end
+
+
+
+        elseif questName == "BEST_COIN_JAR" or questName == "COIN_JAR" then
+            print("Doing Quest:", questName)
+            local coinJar
+            for itemId, tbl in inventory.Misc do
+                task.wait()
+                if tbl.id == "Basic Coin Jar" then
+                    coinJar = tbl.id
+                    break
+                elseif tbl.id == "Giant Coin Jar" then
+                    coinJar = tbl.id
+                end
+            end
+            if coinJar ~= nil then
+                for i=1, questActualAmount do
+                    while true do
+                        task.wait()
+                        if len(clientSaveGet.Goals) == 0 then break end
+                        local questId = clientSaveGet.Goals[goalsNumber]["Type"]
+                        if not thereIsAlreadySomethingInThisArea() and (checkType(questId) == "BEST_COIN_JAR" or checkType(questId) == "COIN_JAR") then
+                            consumeRandomEvent(coinJar, "CoinJar_Spawn")
+                            while thereIsAlreadySomethingInThisArea() do
+                                task.wait(0.3)
+                            end
+                            break
+                        elseif checkType(questId) ~= "BEST_COIN_JAR" and checkType(questId) ~= "COIN_JAR" then
+                            break
+                        end
+                    end
+                end
+                break
+            end
+        
+
+
+        -- Collecting
+        elseif questName == "COLLECT_POTION" or questName == "COLLECT_ENCHANT" then
+            print("Doing Quest:", questName)
+            print("Beach Boss Chest Cooldown Time: ".. (os.time() - beachBossChestCooldownStart))
+            print("Underworld Boss Chest Cooldown Time: ".. (os.time() - underWorldBossChestCooldownStart))
+            print("No Path Forest Boss Chest Cooldown Time: ".. (os.time() - noPathForestBossChestCooldownStart))
+            print("Heaven Gates Boss Chest Cooldown Time: ".. (os.time() - heavenGatesBossChestCooldownStart))
+            if os.time() - beachBossChestCooldownStart >= bossChestCooldown or
+            os.time() - underWorldBossChestCooldownStart >= bossChestCooldown or
+            os.time() - noPathForestBossChestCooldownStart >= bossChestCooldown or
+            os.time() - heavenGatesBossChestCooldownStart >= bossChestCooldown then
+                callByBoss = true
+                autoBossChest()
+                currentZone = nil
+                teleportToMaxZone()
+            elseif questName == "COLLECT_ENCHANT" and checkEnoughEnchant() then
+                upgradeEnchant()
+            elseif questName == "COLLECT_POTION" and checkEnoughPotion() then
+                upgradePotion()
+            else
+                buyVendingMachine()
+            end
+
+        -- Upgrading
+        elseif questName == "UPGRADE_POTION" then
+            print("Doing Quest:", questName)
+            -- tier 3 upgrade to 4 requires 4
+            -- tier 1/2 upgrade to 2/3 requires 3
+            upgradePotion()
+
+        elseif questName == "UPGRADE_ENCHANT" then
+            print("Doing Quest:", questName)
+            -- tier 4 upgrade to 5 requires 7
+            -- tier 1-3 upgrade to 2-4 requires 5
+            upgradeEnchant()
+
+
+        -- Upgrading Pets
+        elseif questName == "BEST_GOLD_PET" then
+            print("Doing Quest:", questName)
+            local usedGoldMachine
+            teleportToMachine("10 | Mine")
+            usedGoldMachine = useGoldMachine(tbl)  
+            if not usedGoldMachine then  -- get normal pets
+                teleportAndHatch()
+            end
+            currentZone = nil
+            teleportToMaxZone()
+
+        elseif questName == "BEST_RAINBOW_PET" then
+            print("Doing Quest:", questName)
+            local usedRainbowMachine
+            totalBestPet = 0
+            teleportToMachine("31 | Desert Pyramids")
+            usedRainbowMachine = useRainbowMachine(tbl)
+            if not usedRainbowMachine then  -- get golden pets
+                -- Check if have enough normal pet, just upgrade to gold
+                for petId, tbl in inventory.Pet do
+                    for _, petName in ipairs(rainbowEggPets) do
+                        task.wait()
+                        -- if all best egg pet not enough
+                        if tbl.id == petName and tbl._am ~= nil and tbl.pt == nil and tbl._am >= 10 then
+                            totalBestPet = totalBestPet + math.floor(tbl._am / 10) * 10
+                        end
+                    end
                 end
 
-            -- Upgrading
-            elseif questName == "UPGRADE_POTION" then
-                print("Doing Quest:", questName)
-                -- tier 3 upgrade to 4 requires 4
-                -- tier 1/2 upgrade to 2/3 requires 3
-                upgradePotion()
-
-            elseif questName == "UPGRADE_ENCHANT" then
-                print("Doing Quest:", questName)
-                -- tier 4 upgrade to 5 requires 7
-                -- tier 1-3 upgrade to 2-4 requires 5
-                upgradeEnchant()
-
-
-            -- Upgrading Pets
-            elseif questName == "BEST_GOLD_PET" then
-                print("Doing Quest:", questName)
-                local usedGoldMachine
-                teleportToMachine("10 | Mine")
-                usedGoldMachine = useGoldMachine(tbl)  
-                if not usedGoldMachine then  -- get normal pets
+                if totalBestPet >= questActualAmount * 100 then
+                    teleportToMachine("10 | Mine")
+                    useGoldMachine(tbl)
+                else
                     teleportAndHatch()
                 end
-                currentZone = nil
-                teleportToMaxZone()
+            end
+            currentZone = nil
+            teleportToMaxZone()
 
-            elseif questName == "BEST_RAINBOW_PET" then
-                print("Doing Quest:", questName)
-                local usedRainbowMachine
-                totalBestPet = 0
-                teleportToMachine("31 | Desert Pyramids")
-                usedRainbowMachine = useRainbowMachine(tbl)
-                if not usedRainbowMachine then  -- get golden pets
-                    -- Check if have enough normal pet, just upgrade to gold
-                    for petId, tbl in inventory.Pet do
-                        for _, petName in ipairs(rainbowEggPets) do
-                            task.wait()
-                            -- if all best egg pet not enough
-                            if tbl.id == petName and tbl._am ~= nil and tbl.pt == nil and tbl._am >= 10 then
-                                totalBestPet = totalBestPet + math.floor(tbl._am / 10) * 10
-                            end
+        -- Using Items
+        -- Potions cooldown too long, have to drink when required for goals
+        elseif questName == "USE_POTION" then
+            print("Doing Quest:", questName)
+            for i=1, questActualAmount do
+                questPotionTier = questPotionTier + 1
+                consumeGoalsPotion(questPotionTier)
+            end
+
+        -- Fruits ignored, will be eaten eventually within 5 mins.
+        -- elseif questName == "USE_FRUIT" then
+        elseif questName == "USE_FLAG" then
+            print("Doing Quest:", questName)
+            for i=1, questActualAmount do
+                if getupvalues(flexibleFlagCmds.GetActiveFlag)[3]["1!".. zoneCmds.GetMaxOwnedZone() .."!Main"] ~= nil then
+                    local activeFlagName = getupvalues(flexibleFlagCmds.GetActiveFlag)[3]["1!".. zoneCmds.GetMaxOwnedZone() .."!Main"].FlagId  -- get active flag name in specified zone.
+                    for itemId, tbl in inventory.Misc do
+                        if tbl.id == activeFlagName then
+                            -- print("Using ", tbl.id)
+                            flexibleFlagCmds.Consume(tbl.id, itemId)
+                            task.wait(1)
                         end
                     end
-
-                    if totalBestPet >= questActualAmount * 100 then
-                        teleportToMachine("10 | Mine")
-                        useGoldMachine(tbl)
-                    else
-                        teleportAndHatch()
-                    end
-                end
-                currentZone = nil
-                teleportToMaxZone()
-
-            -- Using Items
-            -- Potions cooldown too long, have to drink when required for goals
-            elseif questName == "USE_POTION" then
-                print("Doing Quest:", questName)
-                for i=1, questActualAmount do
-                    questPotionTier = questPotionTier + 1
-                    consumeGoalsPotion(questPotionTier)
-                end
-
-            -- Fruits ignored, will be eaten eventually within 5 mins.
-            -- elseif questName == "USE_FRUIT" then
-            elseif questName == "USE_FLAG" then
-                print("Doing Quest:", questName)
-                for i=1, questActualAmount do
-                    if getupvalues(flexibleFlagCmds.GetActiveFlag)[3]["1!".. zoneCmds.GetMaxOwnedZone() .."!Main"] ~= nil then
-                        local activeFlagName = getupvalues(flexibleFlagCmds.GetActiveFlag)[3]["1!".. zoneCmds.GetMaxOwnedZone() .."!Main"].FlagId  -- get active flag name in specified zone.
-                        for itemId, tbl in inventory.Misc do
-                            if tbl.id == activeFlagName then
-                                -- print("Using ", tbl.id)
-                                flexibleFlagCmds.Consume(tbl.id, itemId)
-                                task.wait(1)
-                            end
-                        end
-                    else
-                        for itemId, tbl in inventory.Misc do
-                            if tbl.id == "Coins Flag" or tbl.id == "Diamonds Flag" then
-                                -- print("Using ", tbl.id)
-                                flexibleFlagCmds.Consume(tbl.id, itemId)
-                                task.wait(1)
-                            end
+                else
+                    for itemId, tbl in inventory.Misc do
+                        if tbl.id == "Coins Flag" or tbl.id == "Diamonds Flag" then
+                            -- print("Using ", tbl.id)
+                            flexibleFlagCmds.Consume(tbl.id, itemId)
+                            task.wait(1)
                         end
                     end
                 end
-                
+            end
+            
 
-            -- Hatch Eggs
-            elseif questName == "BEST_EGG" then
-                print("Doing Quest:", questName)
-                BEST_EGG = true
+        -- Hatch Eggs
+        elseif questName == "BEST_EGG" then
+            print("Doing Quest:", questName)
+            BEST_EGG = true
+            teleportAndHatch()
+            currentZone = nil
+            teleportToMaxZone()
+        elseif questName == "HATCH_RARE_PET" then
+            print("Doing Quest:", questName)
+            if len(clientSaveGet.Goals) > 0 then
+                HATCH_RARE_PET = true
                 teleportAndHatch()
                 currentZone = nil
                 teleportToMaxZone()
-            elseif questName == "HATCH_RARE_PET" then
-                print("Doing Quest:", questName)
-                if len(clientSaveGet.Goals) > 0 then
-                    HATCH_RARE_PET = true
-                    teleportAndHatch()
-                    currentZone = nil
-                    teleportToMaxZone()
-                end
+            end
 
-            -- DIGGING AND FISHING
-            elseif questName == "FISHING" then
-                print("Doing Quest:", questName)
-                print("Doing Fishing")
-                teleportToFishing()
-                if not fishingOptimized then
-                    fishingOptimized = true
-                    optimizeFishing()
+        -- DIGGING AND FISHING
+        elseif questName == "FISHING" then
+            print("Doing Quest:", questName)
+            print("Doing Fishing")
+            teleportToFishing()
+            if not fishingOptimized then
+                fishingOptimized = true
+                optimizeFishing()
+            end
+            startFishing()
+            currentZone = nil
+            teleportToMaxZone()
+
+        elseif questName == "DIGSITE" then
+            print("Doing Quest:", questName)
+            if len(clientSaveGet.Goals) > 0 then
+                teleportToDigsite()
+                -- Delete digsite texture (SAVE CPU)
+                for _, v in pairs(Active.Digsite:GetChildren()) do
+                    if string.find(v.Name, "hill") or string.find(v.Name, "Flower") or string.find(v.Name, "rock") or string.find(v.Name, "Meshes") or string.find(v.Name, "Sign") or string.find(v.Name, "Wood") or v.Name == "Model" then
+                        v:Destroy()
+                    end
                 end
-                startFishing()
+                startDigging()
                 currentZone = nil
                 teleportToMaxZone()
-
-            elseif questName == "DIGSITE" then
-                print("Doing Quest:", questName)
-                if len(clientSaveGet.Goals) > 0 then
-                    teleportToDigsite()
-                    -- Delete digsite texture (SAVE CPU)
-                    for _, v in pairs(Active.Digsite:GetChildren()) do
-                        if string.find(v.Name, "hill") or string.find(v.Name, "Flower") or string.find(v.Name, "rock") or string.find(v.Name, "Meshes") or string.find(v.Name, "Sign") or string.find(v.Name, "Wood") or v.Name == "Model" then
-                            v:Destroy()
-                        end
-                    end
-                    startDigging()
-                    currentZone = nil
-                    teleportToMaxZone()
-                end
             end
         end
-    end)
+    end
 end
 print("Done with rank")
 
