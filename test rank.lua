@@ -530,10 +530,8 @@ local function teleportToMaxZone()
 
     if maxZoneData.ZoneNumber >= getgenv().autoWorldConfig.ZONE_TO_REACH and rankCmds.GetMaxRank() >= getgenv().autoWorldConfig.RANK_TO_REACH and clientSaveGet.Rebirths >= getgenv().autoWorldConfig.REBIRTH_TO_REACH then
         print("Reached selected zone, rebirth and rank")
-        print("unequipping")
         game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Pets_UnequipAll"):FireServer()
         task.wait(1)
-        print("equipping")
         require(game:GetService("ReplicatedStorage").Library.Client.PetCmds).Restore()
         task.wait(2)
         DeleteMapTextures(map)
@@ -584,15 +582,15 @@ local function checkAndEquipBestSpecifiedEnchants()
                 local redo = true
                 -- 1. Check if equipped with best tier, 2. if not equipped, try to equip
                 if clientSaveGet.EquippedEnchants[tostring(enchantSlotNumber)] == bestEnchants[enchantName]["id"] then  -- EquippedEnchants[string number]
-                    print("Best enchant: ", enchantName, " already equipped.")
+                    -- print("Best enchant: ", enchantName, " already equipped.")
                 else
-                    print("No best enchant found for slot ", enchantSlotNumber)
+                    -- print("No best enchant found for slot ", enchantSlotNumber)
                     enchantCmds.Unequip(enchantSlotNumber)
                     task.wait(1)
                     enchantCmds.Equip(bestEnchants[enchantName]["id"])
                     task.wait(1)
                     if clientSaveGet.EquippedEnchants[tostring(enchantSlotNumber)] == bestEnchants[enchantName]["id"] then
-                        print("Empty slot equipped ", enchantName)
+                        -- print("Empty slot equipped ", enchantName)
                     else
                         local secondaryBestEnchantTier = bestEnchants[enchantName]["tier"]
                         while redo do
@@ -604,7 +602,6 @@ local function checkAndEquipBestSpecifiedEnchants()
                                     tbl.id == "Lucky Eggs" or tbl.id == "Strong Pets" or tbl.id == "Treasure Hunter" then
 
                                         if tbl.tn == secondaryBestEnchantTier and tbl.id == enchantName then -- if tier found in inventory same as downgraded tier, equip it
-                                            print(tbl.id)
                                             enchantCmds.Unequip(enchantSlotNumber)
                                             enchantCmds.Equip(enchantId)
                                             redo = false
@@ -613,7 +610,7 @@ local function checkAndEquipBestSpecifiedEnchants()
                                     end
                                 end
                             else
-                                print("No enchant found for ", enchantSlotNumber, " slot.")
+                                -- print("No enchant found for ", enchantSlotNumber, " slot.")
                                 redo = false
                             end
                         end
@@ -689,7 +686,7 @@ end
 local function checkAndRedeemGift()
     for giftIndex, seconds in pairs(giftTiming) do
         if clientSaveGet.FreeGiftsTime >= seconds then
-            print("Redeeming Free Gift ", giftIndex)
+            -- print("Redeeming Free Gift ", giftIndex)
             ReplicatedStorage:WaitForChild("Network"):WaitForChild("Redeem Free Gift"):InvokeServer(giftIndex)
             task.wait(1) -- wait to collect gifts properly
         else
@@ -710,7 +707,7 @@ local function checkAndConsumeFruits()
         task.wait(0.5)
         if fruitCmds.GetActiveFruits()[tbl.id] ~= nil then
             if (#fruitCmds.GetActiveFruits()[tbl.id]["Normal"] < maxFruitQueue) and (tbl._am ~= nil) then
-                print("Continue consuming ", tbl.id)
+                -- print("Continue consuming ", tbl.id)
                 if tbl._am < fruitCmds.GetMaxConsume(fruitId) then
                     fruitCmds.Consume(fruitId, tonumber(tbl._am))
                 else
@@ -728,13 +725,13 @@ local function checkAndConsumeGifts()
     for itemId, value in pairs(inventory.Misc) do
         if string.find(value.id:lower(), "bundle") or string.find(value.id:lower(), "gift bag") or (value.id == "Mini Chest") then
             if not value._am then
-                print("Consuming ", value.id)
+                -- print("Consuming ", value.id)
                 ReplicatedStorage:WaitForChild("Network"):WaitForChild("GiftBag_Open"):InvokeServer(value.id)
             elseif value._am < 100 then
-                print("Consuming ", value.id)
+                -- print("Consuming ", value.id)
                 ReplicatedStorage:WaitForChild("Network"):WaitForChild("GiftBag_Open"):InvokeServer(value.id, value._am)
             else
-                print("Consuming ", value.id)
+                -- print("Consuming ", value.id)
                 ReplicatedStorage:WaitForChild("Network"):WaitForChild("GiftBag_Open"):InvokeServer(value.id, 100)
             end
             task.wait(1)
@@ -757,7 +754,7 @@ local function checkAndConsumePotions()
             end
         end
         if highestTierPotion > 0 then
-            print("Consuming ", potionName, ", Tier: ", highestTierPotion)
+            -- print("Consuming ", potionName, ", Tier: ", highestTierPotion)
             task.wait(1)
             potionCmds.Consume(highestTierPotionId)
         end
@@ -768,7 +765,7 @@ end
 local function consumeGoalsPotion(questPotionTier)
     for itemId, value in pairs(inventory.Potion) do
         if questPotionTier == value.tn then
-            print("Consuming ", value.id, ", Tier: ", questPotionTier)
+            -- print("Consuming ", value.id, ", Tier: ", questPotionTier)
             potionCmds.Consume(itemId)
             task.wait(1)
             break
@@ -782,13 +779,13 @@ local function checkAndConsumeToys()
     for itemId, value in pairs(inventory.Misc) do
         if value.id == "Squeaky Toy" then
             if not buffCmds.IsActive("Squeaky Toy") then
-                print("Consuming Squeak Toy.")
+                -- print("Consuming Squeak Toy.")
                 task.wait(1)
                 ReplicatedStorage:WaitForChild("Network"):WaitForChild("SqueakyToy_Consume"):InvokeServer()
             end
         elseif value.id == "Toy Bone" then
             if not buffCmds.IsActive("Toy Bone") then
-                print("Consuming Toy Bone")
+                -- print("Consuming Toy Bone")
                 task.wait(1)
                 ReplicatedStorage:WaitForChild("Network"):WaitForChild("ToyBone_Consume"):InvokeServer()
             end
@@ -1150,7 +1147,6 @@ end
 
 
 local function buyVendingMachine()
-    print("In buyVendingMachine")
     local sortedKeys = {}
     for key in pairs(vendingMachines) do
         table.insert(sortedKeys, key)
@@ -1186,7 +1182,7 @@ local function buyVendingMachine()
         local questId = clientSaveGet.Goals[goalsNumber]["Type"]
         if (vendingMachineName == "FruitVendingMachine1" or vendingMachineName == "FruitVendingMachine2") and 
         vendingMachineStock >= 4 then
-            print("Buying Fruits " .. zoneName)
+            -- print("Buying Fruits " .. zoneName)
 
             teleportToVendingOrBossChestZone(zoneName)
             waitForVendingOrBossChestLoad(zoneName)
@@ -1200,7 +1196,7 @@ local function buyVendingMachine()
         elseif checkType(questId) == "COLLECT_POTION" and 
         (vendingMachineName == "PotionVendingMachine1" or vendingMachineName == "PotionVendingMachine2") and 
         vendingMachineStock > 0 then
-            print("Buying Potion: " .. zoneName)
+            -- print("Buying Potion: " .. zoneName)
 
             teleportToVendingOrBossChestZone(zoneName)
             waitForVendingOrBossChestLoad(zoneName)
@@ -1214,7 +1210,7 @@ local function buyVendingMachine()
         elseif checkType(questId) == "COLLECT_ENCHANT" and 
         (vendingMachineName == "EnchantVendingMachine1" or vendingMachineName == "EnchantVendingMachine2") and 
         vendingMachineStock > 0 then
-            print("Buying Enchant " .. zoneName)
+            -- print("Buying Enchant " .. zoneName)
 
             teleportToVendingOrBossChestZone(zoneName)
             waitForVendingOrBossChestLoad(zoneName)
@@ -1327,7 +1323,6 @@ local function startFishing()
     
         local bobberPos = playerBobber.CFrame.Y
         local startTime = tick()
-        print(playerBobber.CFrame.Y, bobberPos)
         while Active:FindFirstChild("Fishing") and playerBobber.CFrame.Y >= bobberPos and (tick() - startTime <= 10) do
             task.wait()
         end
@@ -1586,14 +1581,13 @@ local function teleportAndHatch()
     -- Hatch eggs
     if questName == "BEST_GOLD_PET" then  -- +1 is to hatch 100 extra egg to make sure enough pets to upgrade gold
         for i=1, math.ceil((questActualAmount + 2) * 10 / currentMaxHatch) do
-            print("Hatching", questName, ":", i)
+            -- print("Hatching", questName, ":", i)
             autoHatchEgg()
         end
 
     elseif questName == "BEST_RAINBOW_PET" then
-        print("doing best rainbow pet")
         for i=1, math.ceil((((questActualAmount + 1) * 100) - totalBestPet) / currentMaxHatch) do
-            print("Hatching", questName, ":", i)
+            -- print("Hatching", questName, ":", i)
             autoHatchEgg()
         end
 
@@ -1619,7 +1613,7 @@ local function teleportAndHatch()
         
         
     eggHatchedBefore = eggData.eggNumber
-    print("Hatching", eggData.name)
+    -- print("Hatching", eggData.name)
     print("Done Hatching...")
 end
 
@@ -1796,7 +1790,7 @@ local function checkAndRedeemRankRewards()
         totalRankStars = totalRankStars + tbl.StarsRequired
         if RankStars >= totalRankStars then
             if not clientSaveGet.RedeemedRankRewards[tostring(questNum)] then -- [num] num has to be string
-                print("Redeeming Reward:", questNum)
+                -- print("Redeeming Reward:", questNum)
                 ReplicatedStorage:WaitForChild("Network"):WaitForChild("Ranks_ClaimReward"):FireServer(questNum)
                 break
             end
@@ -2182,7 +2176,7 @@ while true do
                         local activeFlagName = getupvalues(flexibleFlagCmds.GetActiveFlag)[3]["1!".. zoneCmds.GetMaxOwnedZone() .."!Main"].FlagId  -- get active flag name in specified zone.
                         for itemId, tbl in inventory.Misc do
                             if tbl.id == activeFlagName then
-                                print("Using ", tbl.id)
+                                -- print("Using ", tbl.id)
                                 flexibleFlagCmds.Consume(tbl.id, itemId)
                                 task.wait(1)
                             end
@@ -2190,7 +2184,7 @@ while true do
                     else
                         for itemId, tbl in inventory.Misc do
                             if tbl.id == "Coins Flag" or tbl.id == "Diamonds Flag" then
-                                print("Using ", tbl.id)
+                                -- print("Using ", tbl.id)
                                 flexibleFlagCmds.Consume(tbl.id, itemId)
                                 task.wait(1)
                             end
