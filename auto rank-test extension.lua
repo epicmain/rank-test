@@ -183,6 +183,10 @@ hookfunction(require(game:GetService("ReplicatedStorage").Library.Client.GUIFX.C
     return
 end)
 
+hookfunction(getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Core["Server Closing"]).UpdateServerClosing, function()
+    return
+end)
+
 -- firework Launch, Explosion, Celebration
 hookfunction(require(game:GetService("ReplicatedStorage").Library.Client.WorldFX.Fireworks).Launch, function()
     return
