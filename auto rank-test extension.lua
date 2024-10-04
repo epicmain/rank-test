@@ -45,15 +45,15 @@ print("Clearing lightnings")
 
 
 local function clearTextures(v)
-    if v:IsA("BasePart") and not v:IsA("MeshPart") then
+    if v:IsA("Part") or v:IsA("BasePart") then
+        v.Transparency = 1
+    elseif v:IsA("BasePart") and not v:IsA("MeshPart") then
         v.Material = "Plastic"
         v.Reflectance = 0
         v.Transparency = 1
     elseif v:IsA("ParticleEmitter") and v.Name == "Item" then
         v:Destroy()
     elseif v:IsA("MeshPart") and tostring(v.Parent) == "Orbs" then
-        v.Transparency = 1
-    elseif v:IsA("Part") or v:IsA("BasePart") then
         v.Transparency = 1
     elseif (v:IsA("Decal") or v:IsA("Texture")) then
         v.Transparency = 1
