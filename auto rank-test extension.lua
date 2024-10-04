@@ -45,9 +45,7 @@ print("Clearing lightnings")
 
 
 local function clearTextures(v)
-    if v:IsA("Part") or v:IsA("BasePart") then
-        v.Transparency = 1
-    elseif v:IsA("BasePart") and not v:IsA("MeshPart") then
+    if v:IsA("BasePart") and not v:IsA("MeshPart") then
         v.Material = "Plastic"
         v.Reflectance = 0
         v.Transparency = 1
