@@ -49,6 +49,10 @@ local function clearTextures(v)
         v.Material = "Plastic"
         v.Reflectance = 0
         v.Transparency = 1
+    elseif v:IsA("ParticleEmitter") and v.Name == "Item" then
+        v:Destroy()
+    elseif v:IsA("MeshPart") and tostring(v.Parent) == "Orbs" then
+        v.Transparency = 1
     elseif v:IsA("Part") or v:IsA("BasePart") then
         v.Transparency = 1
     elseif (v:IsA("Decal") or v:IsA("Texture")) then
@@ -74,6 +78,8 @@ local function clearTextures(v)
         v:Destroy()
     elseif string.find(v.Name, "Tree") or string.find(v.Name, "Bush") or string.find(v.Name, "grass") then
         task.wait()
+        v:Destroy()
+    elseif v.Name == "Waterfall" then
         v:Destroy()
     end
 end
@@ -118,6 +124,34 @@ orb.CombineDelay = 0
 orb.CombineDistance = 400
 
 game:GetService("Players").LocalPlayer.PlayerGui.Notifications:Destroy()  -- delete notifs
+game:GetService("ReplicatedStorage").Assets.Models.RandomEvents:Destroy()  -- delete event
+-- hookfunction CreateFallingComet, CreateFallingLuckyBlock, CreateJar, CreateEvent, BeginEvent
+
+local randomEventFunctions = {"CreateEvent", "BeginEvent"}
+local randomEventNames = {"Coin Jar", "Pinata", "Lucky Block", "Comet"}
+for _, v in pairs(randomEventNames) do
+    hookfunction(getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Random Events"][v]).CreateEvent, function()
+        return
+    end)
+    hookfunction(getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Random Events"][v]).BeginEvent, function()
+        return
+    end)
+end
+hookfunction(getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Random Events"]["Coin Jar"]).CreateJar, function()
+    return
+end)
+-- hookfunction(getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Random Events"]["Pinata"]).BeginEvent, function()
+--     return
+-- end)
+hookfunction(getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Random Events"]["Lucky Block"]).CreateFallingLuckyBlock, function()
+    return
+end)
+hookfunction(getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Random Events"]["Comet"]).CreateFallingComet, function()
+    return
+end)
+
+game:GetService("Players").bridget1194.PlayerScripts.Scripts.Game["Machine Animations"]:Destroy()
+game:GetService("Players").bridget1194.PlayerScripts.Scripts.Game.Ultimates:Destroy()
 
 -- Settings toggling not working.
 print(require(Client.SettingsCmds).Get("PotatoMode"))
@@ -148,6 +182,17 @@ hookfunction(require(game:GetService("ReplicatedStorage").Library.Client.OrbCmds
 end)
 
 hookfunction(require(game:GetService("ReplicatedStorage").Library.Client.GUIFX.Confetti).Play, function()
+    return
+end)
+
+-- firework Launch, Explosion, Celebration
+hookfunction(require(game:GetService("ReplicatedStorage").Library.Client.WorldFX.Fireworks).Launch, function()
+    return
+end)
+hookfunction(require(game:GetService("ReplicatedStorage").Library.Client.WorldFX.Fireworks).Explosion, function()
+    return
+end)
+hookfunction(require(game:GetService("ReplicatedStorage").Library.Client.WorldFX.Fireworks).Celebration, function()
     return
 end)
 
@@ -313,7 +358,7 @@ antiAFK()
 
 
 while true do
-    task.wait(0.25)
+    task.wait()
     local activeChild = #Active:GetChildren()
     if activeChild == 0 then
         tapAura()
