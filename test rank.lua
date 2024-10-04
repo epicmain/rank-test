@@ -169,11 +169,6 @@ local MAX_UPGRADE_GEM = 20000
 local fishingOptimized = false
 
 
-local maxHatchAmount = 20
-local inventory = clientSaveGet.Inventory
-local fastestHatchTime = getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Egg Opening Frontend"]).computeSpeedMult() * 2
-
-
 -- 10 = Golden Machine
 -- 13 = Upgrade Potion Machine
 -- 16 = Upgrade Enchant Machine
@@ -224,7 +219,7 @@ local heavenGatesBossChestCooldownStart = 0
 local callByBoss = false
 local normalOrChest
 
-local Breakables = game:GetService("Workspace")["__THINGS"].Breakables
+local Breakables = game:GetService("Workspace")["__DEBRIS"]
 
 
 local giftTiming = {
@@ -462,15 +457,6 @@ local function checkType(number)
 end 
 
 
-local function DeleteAllTextures()
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("Part") or v:IsA("BasePart") then
-            v.Transparency = 1
-        end
-    end
-end
-
-
 local function teleportToMaxZone()
     -- print("in teleportToMaxZone()")
 
@@ -526,7 +512,6 @@ local function teleportToMaxZone()
         task.wait(2)
         require(game:GetService("ReplicatedStorage").Library.Client.PetCmds).Restore()
         task.wait(2)
-        DeleteAllTextures()
         -- print("Pets Restored.")
         unfinished = false
     end
@@ -1025,7 +1010,7 @@ local function breakChest(zone)
     local brokeChest = false
     local breakableRemovedService = Breakables.ChildRemoved:Connect(function(breakable)
         task.wait()
-        if breakable.Name == chest then
+        if string.find(breakable.Name, chest) then
             brokeChest = true
             -- print("Broke chest")
         end
@@ -1573,11 +1558,6 @@ local function teleportAndHatch()
     task.wait(1)
     myHumanoidRootPart.CFrame = eggCFrame  -- Teleport to egg
     task.wait(1)
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("Part") or v:IsA("BasePart") then
-            v.Transparency = 1
-        end
-    end
 
     -- Hatch eggs
     if questName == "BEST_GOLD_PET" then  -- +1 is to hatch 100 extra egg to make sure enough pets to upgrade gold
