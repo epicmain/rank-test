@@ -1035,13 +1035,15 @@ local function breakChest(zone)
         myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.BREAKABLE_SPAWNS.Boss.CFrame + Vector3.new(0, 10, 0)
     end
 
+    local breakChestTimeLimit = 10
+    local breakChestTimeStart = tick()
     repeat
         local args = {
             [1] = chest
         }
         game:GetService("ReplicatedStorage").Network.Breakables_PlayerDealDamage:FireServer(unpack(args))
         task.wait()
-    until brokeChest
+    until brokeChest or (tick() - breakChestTimeStart) >= breakChestTimeLimit
 
     breakableRemovedService:Disconnect()
 end
@@ -1134,6 +1136,7 @@ local function autoBossChest()
         end
     end
     currentZone = nil
+    print("teleporting back t")
     teleportToMaxZone()
 end
 
