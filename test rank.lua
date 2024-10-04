@@ -1179,7 +1179,7 @@ local function buyVendingMachine()
             teleportToVendingOrBossChestZone(zoneName)
             waitForVendingOrBossChestLoad(zoneName)
             
-            myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
+            myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(10, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
             currentZone = nil
@@ -1193,7 +1193,7 @@ local function buyVendingMachine()
             teleportToVendingOrBossChestZone(zoneName)
             waitForVendingOrBossChestLoad(zoneName)
             
-            myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
+            myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(10, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
             currentZone = nil
@@ -1207,7 +1207,7 @@ local function buyVendingMachine()
             teleportToVendingOrBossChestZone(zoneName)
             waitForVendingOrBossChestLoad(zoneName)
             
-            myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(0, 10, 0)
+            myHumanoidRootPart.CFrame = vendingOrBossChestZonePath.INTERACT.Machines[vendingMachineName].PadGlow.CFrame + Vector3.new(10, 10, 0)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("VendingMachines_Purchase"):InvokeServer(vendingMachineName,vendingMachineStock)
             currentZone = nil
@@ -1438,22 +1438,22 @@ local function teleportToMachine(mapName)
     end
     
     if mapName == "4 | Green Forest" then
-        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.EquipSlotsMachine.PadGlow.CFrame + Vector3.new(0, 10, 0)
+        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.EquipSlotsMachine.PadGlow.CFrame + Vector3.new(10, 10, 0)
 
     elseif mapName == "8 | Backyard" then
-        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.EggSlotsMachine.PadGlow.CFrame + Vector3.new(0, 10, 0)
+        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.EggSlotsMachine.PadGlow.CFrame + Vector3.new(10, 10, 0)
 
     elseif mapName == "10 | Mine" then
-        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.GoldMachine.PadGlow.CFrame + Vector3.new(0, 10, 0)
+        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.GoldMachine.PadGlow.CFrame + Vector3.new(10, 10, 0)
 
     elseif mapName == "13 | Dark Forest" then
-        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.UpgradePotionsMachine.PadGlow.CFrame + Vector3.new(0, 10, 0)
+        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.UpgradePotionsMachine.PadGlow.CFrame + Vector3.new(10, 10, 0)
 
     elseif mapName == "16 | Crimson Forest" then
-        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.UpgradeEnchantsMachine.PadGlow.CFrame + Vector3.new(0, 10, 0)
+        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.UpgradeEnchantsMachine.PadGlow.CFrame + Vector3.new(10, 10, 0)
 
     elseif mapName == "31 | Desert Pyramids" then
-        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.RainbowMachine.PadGlow.CFrame + Vector3.new(0, 10, 0)
+        myHumanoidRootPart.CFrame = zonePath.INTERACT.Machines.RainbowMachine.PadGlow.CFrame + Vector3.new(10, 10, 0)
     end
     task.wait(2)
 end
