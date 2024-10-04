@@ -457,6 +457,15 @@ local function checkType(number)
 end 
 
 
+local function DeleteAllTextures()
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("Part") or v:IsA("BasePart") then
+            v.Transparency = 1
+        end
+    end
+end
+
+
 local function teleportToMaxZone()
     -- print("in teleportToMaxZone()")
 
@@ -512,6 +521,7 @@ local function teleportToMaxZone()
         task.wait(2)
         require(game:GetService("ReplicatedStorage").Library.Client.PetCmds).Restore()
         task.wait(2)
+        DeleteAllTextures()
         -- print("Pets Restored.")
         unfinished = false
     end
@@ -1121,7 +1131,7 @@ local function autoBossChest()
         end
     end
     currentZone = nil
-    print("teleporting back t")
+    print("teleporting back")
     teleportToMaxZone()
 end
 
@@ -1558,6 +1568,11 @@ local function teleportAndHatch()
     task.wait(1)
     myHumanoidRootPart.CFrame = eggCFrame  -- Teleport to egg
     task.wait(1)
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("Part") or v:IsA("BasePart") then
+            v.Transparency = 1
+        end
+    end
 
     -- Hatch eggs
     if questName == "BEST_GOLD_PET" then  -- +1 is to hatch 100 extra egg to make sure enough pets to upgrade gold
