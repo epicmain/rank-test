@@ -117,6 +117,7 @@ orb.SoundDistance = 0
 orb.CombineDelay = 0
 orb.CombineDistance = 400
 
+game:GetService("Players").LocalPlayer.PlayerGui.Notifications:Destroy()  -- delete notifs
 
 -- Settings toggling not working.
 print(require(Client.SettingsCmds).Get("PotatoMode"))
