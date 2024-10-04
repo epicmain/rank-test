@@ -150,8 +150,8 @@ hookfunction(getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.Script
     return
 end)
 
-game:GetService("Players").bridget1194.PlayerScripts.Scripts.Game["Machine Animations"]:Destroy()
-game:GetService("Players").bridget1194.PlayerScripts.Scripts.Game.Ultimates:Destroy()
+game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Machine Animations"]:Destroy()
+game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game.Ultimates:Destroy()
 
 -- Settings toggling not working.
 print(require(Client.SettingsCmds).Get("PotatoMode"))
