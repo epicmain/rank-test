@@ -315,7 +315,7 @@ end
 
 local function antiAFK()
     -- disable idle tracking event
-    LocalPlayer.PlayerScripts.Scripts.Core["Idle Tracking"].Enabled = false
+    LocalPlayer.PlayerScripts.Scripts.Core["Idle Tracking"].Disabled = true
     if getconnections then
         for _, v in pairs(getconnections(LocalPlayer.Idled)) do
             v:Disable()
