@@ -472,7 +472,7 @@ end
 
 
 local function teleportToMaxZone()
-    -- print("in teleportToMaxZone()")
+    print("in teleportToMaxZone()")
     maxZoneName, maxZoneData = zoneCmds.GetMaxOwnedZone()
     -- print("Teleporting to: ", maxZoneName)
     while currentZone == maxZoneName do
@@ -1573,7 +1573,7 @@ end
 
 
 local function teleportAndHatch()
-    -- print("In teleport and hatch")
+    print("In teleport and hatch")
     -- Teleport to Best Egg
     for _, v in pairs(Workspace.__THINGS.Eggs[worldEgg]:GetChildren()) do
         if string.find(v.Name, tostring(eggData.eggNumber) .. " - ") then
@@ -1694,6 +1694,7 @@ end
 
 
 local function useGoldMachine(tbl)
+    print("Using Gold Machine")
     if PlaceId == 8737899170 then
         teleportToMachine("10 | Mine")
     else
@@ -1724,6 +1725,7 @@ end
 
 
 local function useRainbowMachine(tbl)
+    print("Using Rainbow Machine")
     if PlaceId == 8737899170 then
         teleportToMachine("31 | Desert Pyramids")
     else
