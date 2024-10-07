@@ -1,10 +1,11 @@
+print("here")
 getgenv().autoWorldConfig = {
     AUTO_REBIRTH = true,
     ZONE_TO_REACH = 199,
     RANK_TO_REACH = 12,
     REBIRTH_TO_REACH = 8
 }
-
+print("here")
 local reachedZone
 
 -- Max Zone For World 1: 99
@@ -14,15 +15,15 @@ local reachedZone
 repeat
     task.wait()
 until game:IsLoaded()
-
+print("here")
 repeat
     task.wait()
 until game.PlaceId ~= nil
-
+print("here")
 repeat
     task.wait()
 until game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
-
+print("here")
 repeat
     task.wait()
 until game:GetService("Workspace").__THINGS and game:GetService("Workspace").__DEBRIS
