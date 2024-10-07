@@ -221,11 +221,11 @@ print("calling p function")
 pcall(function()
     game:GetService("Workspace").ALWAYS_RENDERING:Destroy()
 
-    for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-        if v:IsA("ScreenGui") then
-            v.Enabled = false
-        end
-    end
+    -- for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+    --     if v:IsA("ScreenGui") then
+    --         v.Enabled = false
+    --     end
+    -- end
 
     -- Disables 3D Rendering (Whitescreen)
     -- local RunService = game:GetService("RunService")
