@@ -589,6 +589,7 @@ local function checkAndEquipBestSpecifiedEnchants()
                     else
                         local secondaryBestEnchantTier = bestEnchants[enchantName]["tier"]
                         while redo do
+                            task.wait()
                             secondaryBestEnchantTier = secondaryBestEnchantTier - 1 -- best enchant for the other slot that wanted the same enchant
                             
                             if secondaryBestEnchantTier >= 1 then -- if its more than tier 1, continue
@@ -1461,6 +1462,7 @@ end
 local function checkAndPurchaseEggSlot()
     local teleportedToEggSlotMachine = false
     while true do
+        task.wait()
         currentEggSlots = clientSaveGet.EggSlotsPurchased
 
         -- if 0 to 9, 33, 67 to 79 -> +1 to currentEggSlots
@@ -1509,6 +1511,7 @@ end
 local function checkAndPurchasePetSlot()
     local teleportedToPetSlotMachine = false
     while true do
+        task.wait()
         currentEquipSlots = clientSaveGet.PetSlotsPurchased + 1
 
         if currencyCmds.Get("Diamonds") >= petSlotDiamondCost[currentEquipSlots] and 
@@ -2157,6 +2160,7 @@ while rebirthNotDone do
             elseif questName == "BEST_GOLD_PET" then
                 print("Doing Quest:", questName)
                 while checkType(clientSaveGet.Goals[goalsNumber]["Type"]) == "BEST_GOLD_PET" do
+                    task.wait()
                     local usedGoldMachine
                     usedGoldMachine = useGoldMachine(tbl)  
                     if not usedGoldMachine then  -- get normal pets
@@ -2177,6 +2181,7 @@ while rebirthNotDone do
             elseif questName == "BEST_RAINBOW_PET" then
                 print("Doing Quest:", questName)
                 while checkType(clientSaveGet.Goals[goalsNumber]["Type"]) == "BEST_RAINBOW_PET" do
+                    task.wait()
                     local usedRainbowMachine
                     totalBestPet = 0
                     usedRainbowMachine = useRainbowMachine(tbl)
