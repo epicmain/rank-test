@@ -5,7 +5,6 @@ getgenv().autoWorldConfig = {
     REBIRTH_TO_REACH = 8
 }
 
-local reachedZone
 
 -- Max Zone For World 1: 99
 -- Max Zone For World 2: 124
@@ -1944,8 +1943,6 @@ while rebirthNotDone do
             currentZone = nil
             teleportToMaxZone()
         end
-    else
-        reachedZone = true
     end
 
     if getgenv().autoWorldConfig.AUTO_REBIRTH and rebirthCmds.GetCurrentRebirth().RebirthNumber < getgenv().autoWorldConfig.REBIRTH_TO_REACH then
@@ -2255,7 +2252,7 @@ while rebirthNotDone do
                     currentZone = nil
                     teleportToMaxZone()
                 end
-            elseif reachedZone and questName == "HATCH_RARE_PET" then
+            elseif maxZoneData.ZoneNumber >= getgenv().autoWorldConfig.ZONE_TO_REACH and questName == "HATCH_RARE_PET" then
                 if checkEnoughCoinsToHatch(1000) then
                     print("Doing Quest:", questName)
                     if len(clientSaveGet.Goals) > 0 then
