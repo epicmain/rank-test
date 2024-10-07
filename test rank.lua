@@ -4,6 +4,7 @@ getgenv().autoWorldConfig = {
     RANK_TO_REACH = 12,
     REBIRTH_TO_REACH = 8
 }
+
 local reachedZone
 
 -- Max Zone For World 1: 99
@@ -13,12 +14,15 @@ local reachedZone
 repeat
     task.wait()
 until game:IsLoaded()
+
 repeat
     task.wait()
 until game.PlaceId ~= nil
+
 repeat
     task.wait()
 until game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+
 repeat
     task.wait()
 until game:GetService("Workspace").__THINGS and game:GetService("Workspace").__DEBRIS
@@ -1660,7 +1664,6 @@ local function checkEnoughCoinsToHatch(amountOfEggs)
         pcall(function()
             if eggData.name == eggName then
                 bestEggPrice = require(Library.Balancing.CalcEggPrice)(eggTbl)
-                break
             end
         end)
     end
