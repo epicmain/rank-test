@@ -361,26 +361,26 @@ end
 antiAFK()
 
 
-while true do
-    task.wait()
-    local activeChild = #Active:GetChildren()
-    zoneName = require(game:GetService("ReplicatedStorage").Library.Client.ZoneCmds).GetMaxOwnedZone()
-    if activeChild == 0 then
-        if len(require(Client.BreakableCmds).AllByZoneAndClass(zoneName, "Chest")) >= 1 then
-            tapAuraAndChest(true)
-        else
-            tapAuraAndChest(false)
-        end
+-- while true do
+--     task.wait()
+--     local activeChild = #Active:GetChildren()
+--     zoneName = require(game:GetService("ReplicatedStorage").Library.Client.ZoneCmds).GetMaxOwnedZone()
+--     if activeChild == 0 then
+--         if len(require(Client.BreakableCmds).AllByZoneAndClass(zoneName, "Chest")) >= 1 then
+--             tapAuraAndChest(true)
+--         else
+--             tapAuraAndChest(false)
+--         end
 
-        if len(require(Client.BreakableCmds).AllByZoneAndClass(zoneName, "Chest")) >= 1 then
-            normalOrChest = "Chest"
-            petTargetChestAndBreakables()
-        else
-            normalOrChest = "Normal"
-            petTargetChestAndBreakables()
-        end
-        activateUlti()
-    end
-end
+--         if len(require(Client.BreakableCmds).AllByZoneAndClass(zoneName, "Chest")) >= 1 then
+--             normalOrChest = "Chest"
+--             petTargetChestAndBreakables()
+--         else
+--             normalOrChest = "Normal"
+--             petTargetChestAndBreakables()
+--         end
+--         activateUlti()
+--     end
+-- end
 
 
