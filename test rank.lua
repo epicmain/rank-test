@@ -1941,8 +1941,6 @@ while rebirthNotDone do
             end
         end
         if boughtNewZone then
-            getBestEggData()
-            getBestEggPets()
             currentZone = nil
             teleportToMaxZone()
         end
@@ -1965,12 +1963,17 @@ while rebirthNotDone do
         end)
     end
 
+    getBestEggData()
+    getBestEggPets()
+
     if (tick() - startAutoHatchEggDelay) >= autoHatchEggDelay and eggHatchedBefore ~= eggData.eggNumber then
-        teleportAndHatch()
-        currentZone = nil
-        teleportToMaxZone()
-        task.wait(1)
-        startAutoHatchEggDelay = tick()
+        if checkEnoughCoinsToHatch(1) then
+            teleportAndHatch()
+            currentZone = nil
+            teleportToMaxZone()
+            task.wait(1)
+            startAutoHatchEggDelay = tick()
+        end
     end
 
 
