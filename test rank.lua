@@ -109,20 +109,19 @@ local fastestHatchTime = getsenv(game:GetService("Players").LocalPlayer.PlayerSc
 local currentMaxHatch = eggCmds.GetMaxHatch()
 local eggData
 local eggCFrame
-local maxHatchAmount = 20
 local eggHatchedBefore = 0
 -- ^^^ Egg hatching variables ^^^
 
 --- vvv EggSlot variables vvv
 local currentEggSlots
 local currentmaxPurchaseableEggs = rankCmds.GetMaxPurchasableEggSlots()
-local MAX_EGG_SLOTS = 20
+local MAX_EGG_SLOTS = 50
 -- ^^^ EggSlot variables ^^^
 
 --- vvv Pet slot variables vvv
 local currentEquipSlots
 local currentmaxPurchaseableEquips = rankCmds.GetMaxPurchasableEquipSlots()
-local MAX_PET_SLOTS = 35
+local MAX_PET_SLOTS = 45
 --- ^^^ Pet slot variables ^^^
 
 -- vvv Fruit variables vvv
@@ -143,9 +142,9 @@ local enchantIdToName
 local enchants = {
     [1] = "Tap Power", 
     [2] = "Coins", 
-    [3] = "Strong Pets", 
-    [4] = "Treasure Hunter", 
-    [5] = "Diamonds"
+    [3] = "Tap Power", 
+    [4] = "Strong Pets", 
+    [5] = "Treasure Hunter"
 }
 
 local bestEnchants = {
@@ -472,7 +471,7 @@ end
 
 
 local function teleportToMaxZone()
-    print("in teleportToMaxZone()")
+    -- print("in teleportToMaxZone()")
     maxZoneName, maxZoneData = zoneCmds.GetMaxOwnedZone()
     -- print("Teleporting to: ", maxZoneName)
     while currentZone == maxZoneName do
@@ -1130,7 +1129,7 @@ local function autoBossChest()
         end
     end
     currentZone = nil
-    print("teleporting back")
+    -- print("teleporting back")
     teleportToMaxZone()
 end
 
@@ -1565,10 +1564,10 @@ local function autoHatchEgg()
     -- auto hatch with delay
     if (tick() - timeStart) >= fastestHatchTime then
         timeStart = tick()
-        if currentMaxHatch <= maxHatchAmount then
+        if currentMaxHatch <= MAX_EGG_SLOTS then
             ReplicatedStorage.Network.Eggs_RequestPurchase:InvokeServer(eggData.name, currentMaxHatch)
         else
-            ReplicatedStorage.Network.Eggs_RequestPurchase:InvokeServer(eggData.name, maxHatchAmount)
+            ReplicatedStorage.Network.Eggs_RequestPurchase:InvokeServer(eggData.name, MAX_EGG_SLOTS)
         end
     end
     task.wait(fastestHatchTime)
@@ -1697,7 +1696,7 @@ end
 
 
 local function useGoldMachine(tbl)
-    print("Using Gold Machine")
+    -- print("Using Gold Machine")
     if PlaceId == 8737899170 then
         teleportToMachine("10 | Mine")
     else
@@ -1728,7 +1727,7 @@ end
 
 
 local function useRainbowMachine(tbl)
-    print("Using Rainbow Machine")
+    -- print("Using Rainbow Machine")
     if PlaceId == 8737899170 then
         teleportToMachine("31 | Desert Pyramids")
     else
@@ -1902,6 +1901,14 @@ task.spawn(function()
             currentZone = nil
             teleportToMaxZone()
         end
+
+        if LocalPlayer.PlayerGui.RankUp.Enabled then
+            LocalPlayer.PlayerGui.RankUp.Enabled = false
+        end
+        
+        if LocalPlayer.PlayerGui.Rebirth.Enabled then
+            LocalPlayer.PlayerGui.Rebirth.Enabled = false
+        end
     end
 end)
 
@@ -2008,7 +2015,7 @@ while rebirthNotDone do
 
             -- Using Misc Items
             if questName == "BEST_LUCKYBLOCK" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 for itemId, tbl in inventory.Misc do
                     if tbl.id == "Mini Lucky Block" then
                         for i=1, questActualAmount do
@@ -2034,7 +2041,7 @@ while rebirthNotDone do
 
 
             elseif questName == "BEST_PINATA" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 for itemId, tbl in inventory.Misc do
                     if tbl.id == "Mini Pinata" then
                         for i=1, questActualAmount do
@@ -2060,7 +2067,7 @@ while rebirthNotDone do
 
 
             elseif questName == "BEST_COMET" or questName == "COMET" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 for itemId, tbl in inventory.Misc do
                     if tbl.id == "Comet" then
                         for i=1, questActualAmount do
@@ -2086,7 +2093,7 @@ while rebirthNotDone do
 
 
             elseif questName == "BEST_COIN_JAR" or questName == "COIN_JAR" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 local coinJar
                 for itemId, tbl in inventory.Misc do
                     task.wait()
@@ -2144,13 +2151,13 @@ while rebirthNotDone do
 
             -- Upgrading
             elseif questName == "UPGRADE_POTION" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 -- tier 3 upgrade to 4 requires 4
                 -- tier 1/2 upgrade to 2/3 requires 3
                 upgradePotion()
 
             elseif questName == "UPGRADE_ENCHANT" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 -- tier 4 upgrade to 5 requires 7
                 -- tier 1-3 upgrade to 2-4 requires 5
                 upgradeEnchant()
@@ -2158,7 +2165,7 @@ while rebirthNotDone do
 
             -- Upgrading Pets
             elseif questName == "BEST_GOLD_PET" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 while checkType(clientSaveGet.Goals[goalsNumber]["Type"]) == "BEST_GOLD_PET" do
                     task.wait()
                     local usedGoldMachine
@@ -2179,7 +2186,7 @@ while rebirthNotDone do
                 teleportToMaxZone()
 
             elseif questName == "BEST_RAINBOW_PET" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 while checkType(clientSaveGet.Goals[goalsNumber]["Type"]) == "BEST_RAINBOW_PET" do
                     task.wait()
                     local usedRainbowMachine
@@ -2218,7 +2225,7 @@ while rebirthNotDone do
             -- Using Items
             -- Potions cooldown too long, have to drink when required for goals
             elseif questName == "USE_POTION" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 for i=1, questActualAmount do
                     questPotionTier = questPotionTier + 1
                     consumeGoalsPotion(questPotionTier)
@@ -2227,7 +2234,7 @@ while rebirthNotDone do
             -- Fruits ignored, will be eaten eventually within 5 mins.
             -- elseif questName == "USE_FRUIT" then
             elseif questName == "USE_FLAG" then
-                print("Doing Quest:", questName)
+                -- print("Doing Quest:", questName)
                 for i=1, questActualAmount do
                     if getupvalues(flexibleFlagCmds.GetActiveFlag)[3]["1!".. zoneCmds.GetMaxOwnedZone() .."!Main"] ~= nil then
                         local activeFlagName = getupvalues(flexibleFlagCmds.GetActiveFlag)[3]["1!".. zoneCmds.GetMaxOwnedZone() .."!Main"].FlagId  -- get active flag name in specified zone.
@@ -2253,7 +2260,7 @@ while rebirthNotDone do
             -- Hatch Eggs
             elseif questName == "BEST_EGG" then
                 if checkEnoughCoinsToHatch(tonumber(questActualAmount)) then
-                    print("Doing Quest:", questName)
+                    -- print("Doing Quest:", questName)
                     BEST_EGG = true
                     teleportAndHatch()
                     currentZone = nil
@@ -2261,7 +2268,7 @@ while rebirthNotDone do
                 end
             elseif maxZoneData.ZoneNumber >= getgenv().autoWorldConfig.ZONE_TO_REACH and questName == "HATCH_RARE_PET" then
                 if checkEnoughCoinsToHatch(1000) then
-                    print("Doing Quest:", questName)
+                    -- print("Doing Quest:", questName)
                     if len(clientSaveGet.Goals) > 0 then
                         HATCH_RARE_PET = true
                         teleportAndHatch()
