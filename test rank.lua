@@ -465,6 +465,10 @@ local function DeleteAllTextures()
     for _, v in pairs(game:GetDescendants()) do
         if v:IsA("Part") or v:IsA("BasePart") then
             v.Transparency = 1
+        elseif v:IsA("TextLabel") then
+            v.TextTransparency = 1
+        elseif v:IsA("ImageLabel") then
+            v.ImageTransparency = 1
         end
     end
 end
@@ -1585,11 +1589,7 @@ local function teleportAndHatch()
     task.wait(1)
     myHumanoidRootPart.CFrame = eggCFrame  -- Teleport to egg
     task.wait(1)
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("Part") or v:IsA("BasePart") then
-            v.Transparency = 1
-        end
-    end
+    DeleteAllTextures()
 
     -- Hatch eggs
     if questName == "BEST_GOLD_PET" then  -- +1 is to hatch 100 extra egg to make sure enough pets to upgrade gold
@@ -1908,6 +1908,10 @@ task.spawn(function()
         
         if LocalPlayer.PlayerGui.Rebirth.Enabled then
             LocalPlayer.PlayerGui.Rebirth.Enabled = false
+        end
+
+        if LocalPlayer.PlayerGui.MasteryPerk.Enabled then
+            LocalPlayer.PlayerGui.MasteryPerk.Enabled = false
         end
     end
 end)
@@ -2317,4 +2321,3 @@ print("Done with rank")
 
 
 
-\
